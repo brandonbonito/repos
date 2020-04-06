@@ -1,0 +1,100 @@
+﻿@model RandomNumberModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Random Number Guess</title>
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <style type="text/css">
+
+        .field-validation-error {
+            color: #ff0000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="col-md-6 col-md-offset-3">
+            <h1>Random Number Guess</h1>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.Guess)
+                @Html.TextBoxFor(model => model.Guess, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Guess)
+            </div>
+
+            <button type="button" class="btn btn-primary btn-lg btn-block submit">Submit</button>
+
+            <br /><br />
+            <div class="alert">
+                <strong><span class="alert-content"></span></strong>
+            </div>
+
+            <br /><br />
+            <div class="form-group" id="PlayAgain">
+                @Html.LabelFor(m => m.PlayAgain)
+                <br />
+                <button type="reset" class="btn btn-success btn-lg btn-block" id="Yes">Yes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS includes -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+
+        function loadGame() {
+            $('#Guess').val(0);
+            $('#PlayAgain').hide();
+            $('.alert-content').text();
+            $('.alert').hide();
+        }
+
+        $(function () {
+            loadGame();
+
+			$('.submit').click(function(){
+				$.ajax({
+					url: '@Url.RouteUrl(new{ action="GetAnswer", controller="Home"})',
+					data: {Guess: $('#Guess').val()},
+					type: 'POST',
+					dataType: 'json',
+					success: function(resp) {
+                        $('.alert-content').text(resp);
+                        $('.alert').show();
+                        $('.alert').addClass("alert-info");
+                        if (resp == "Congratulations!") {
+                            $('.alert').removeClass("alert-info");
+                            $('.alert').addClass("alert-success");
+                            $('#PlayAgain').show();
+                        }
+				}});
+			});
+
+        });
+
+        $('#Yes').click(function () {
+            loadGame();
+
+            $.ajax({
+				url: '@Url.RouteUrl(new{ action="PlayAgain", controller="Home"})',
+				data: {},
+				type: 'POST',
+				dataType: 'json',
+                success: function() {
+			}});
+        });
+
+    </script>
+</body>
+</html>
